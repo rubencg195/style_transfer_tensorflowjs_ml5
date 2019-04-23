@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+
+  <title>Style Transfer Using Tensorflow.js + Posenet - Ruben Chevez</title>
+  <link rel="icon" href="https://rubencg195.github.io/profile256.jpg">
+  <meta name="description" content="Pose Detection Demo" />
+
+  <!-- Schema.org markup for Google+ -->
+  <meta itemprop="name" content="Ruben Chevez">
+  <meta itemprop="description" content="Style Transfer Demo">
+  <meta itemprop="image" content="https://rubencg195.github.io/profile256.jpg">
+
+  <!-- Twitter Card data -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@rubencg195">
+  <meta name="twitter:title" content="Ruben Chevez">
+  <meta name="twitter:description" content="Style Transfer Demo">
+  <meta name="twitter:creator" content="@rubencg195">
+  <!-- Twitter summary card with large image must be at least 280x150px -->
+  <meta name="twitter:image:src" content="https://rubencg195.github.io/profile256.jpg">
+
+  <!-- Open Graph data -->
+  <meta property="og:title" content="Ruben Chevez" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://rubencg195.github.io/" />
+  <meta property="og:image" itemprop="image" content="https://rubencg195.github.io/profile256.jpg" />
+  <meta property="og:image:alt" content="Style Transfer Demo" />
+  <meta property="og:description" content="Style Transfer Demo" />
+  <meta property="og:site_name" content="Ruben Chevez" />
+  <meta property="og:image:type" content="image/jpeg">
+  <meta property="og:updated_time" content="1/1/2019 12:00:00 AM">
+  <meta property="og:locale" content="en_US" />
+  <!-- <meta property="article:section" content="Ruben Chevez" />
+  <meta property="article:tag" content="Ruben Chevez" /> -->
+  <!-- <meta property="fb:admins" content="Posebook numberic ID" /> -->
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.0/css/all.css">
+  <!-- Bootstrap core CSS -->
+  <link href="https://rubencg195.github.io/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Material Design Bootstrap -->
+  <link href="https://rubencg195.github.io/css/mdb.min.css" rel="stylesheet">
+  <!-- Your custom styles (optional) -->
+  <link href="https://rubencg195.github.io/css/style.css" rel="stylesheet">
+
+  <script src="https://code.jquery.com/pep/0.4.1/pep.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.7.3/p5.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.7.3/addons/p5.dom.min.js"></script>
+  <script src="https://unpkg.com/ml5@0.2.2/dist/ml5.min.js" type="text/javascript"></script>
+</head>
+
+<body>
+  <!--Navbar -->
+  <nav class="mb-1 navbar navbar-expand-lg navbar-dark blue-gradient">
+    <a class="navbar-brand" href="#">Ruben Chevez</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent-555"
+      aria-controls="navbarSupportedContent-555" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent-555">
+      <ul class="navbar-nav mr-auto">
+        <li class="nav-item active">
+          <a class="nav-link" href="https://rubencg195.github.io/">Back To Portfolio
+            <span class="sr-only">(current)</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" onclick="downloadResume()">Download Resume</a>
+        </li>
+      </ul>
+      <ul class="navbar-nav ml-auto nav-flex-icons">
+        <li class="nav-item avatar">
+          <a class="nav-link p-0" href="https://rubencg195.github.io/">
+            <img src="https://rubencg195.github.io/profile256.jpg" class="rounded-circle z-depth-0" alt="avatar image"
+              height="35">
+          </a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+  <!--/.Navbar -->
+  <ul class="nav justify-content-center grey lighten-4 py-4" id="TabsContainerNav" style="display: none;">
+    <li class="nav-item">
+      <a class="nav-link active" id="home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home"
+        aria-selected="true">Image Style Transfer</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" id="profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="profile"
+        aria-selected="false">Realtime Webcam Style Transfer</a>
+    </li>
+    <!-- <li class="nav-item">
+      <a class="nav-link" id="contact-tab" data-toggle="tab" href="#contact" role="tab" aria-controls="contact"
+        aria-selected="false">Webcam to Avatar</a>
+    </li> -->
+  </ul>
+
+  <div class="container text-center text-primary" id="loadingTab1" style="display: none;">
+    <div class="d-flex align-items-center justify-content-center" style="height: 10vh;">
+      <h1 id="loadingTextTab1">Loading Machine Learning Models...</h1>
+      <div>
+        <div class="spinner-border ml-auto" aria-hidden="true" role="status"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container" id="TabsContainer">
+    <div class="tab-content" id="myTabContent">
+      <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
+
+        <div id="Tab1" class="text-center" style="display: none">
+
+
+          <div class="row">
+            <div class="col-md-4">
+              <br />
+              <h5 class="animated fadeIn mb-3">
+                Upload an Image for Style-Transfer.
+              </h5>
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text" id="inputGroupFileAddon01">Upload</span>
+                </div>
+                <div class="custom-file">
+                  <input type="file" class="custom-file-input" id="refImgUploadInput"
+                    aria-describedby="refImgUploadInputAddon01" onchange="uploadRefImage()" accept=".jpg, .jpeg, .png">
+                  <label class="custom-file-label" for="refImgUploadInput">Upload Image:</label>
+                </div>
+              </div>
+              <br />
+              <br />
+              <div class="view" id="imageContainer">
+                <img id="refImg" src="" alt="smaple image" width="100%">
+                <!--style="width: 100%;"-->
+                <div class="mask flex-center ">
+                  <canvas id="refImgOverlay" class="overlay" />
+                </div>
+              </div>
+
+            </div>
+            <div class="col-md-4">
+              <br />
+              <h5>Select a Style</h5>
+              <select class="browser-default custom-select custom-select-lg mb-3" id="styleSelect">
+                <option selected value="1">Wave</option>
+                <option value="2">Udnie</option>
+                <option value="3">Mathura</option>
+                <option value="4">Scream</option>
+                <option value="5">Matta</option>
+              </select>
+
+
+              <div id="styleDescription">
+                <p>Style:
+                  <img src="wave.jpg" alt="style one" width="100%;" id="styleImageURL">
+                  <a href="https://en.wikipedia.org/wiki/The_Great_Wave_off_Kanagawa" id="styleTitle">
+                    The Great Wave off Kanagawa, 1829 - Katsushika Hokusai
+                  </a></p>
+              </div>
+
+            </div>
+            <div class="col-md-4">
+              <br />
+              <h5>The Output</h5>
+              <p><strong>Note:</strong> Depending on your computer's graphic's card, the higher this values, there is a
+                higher the probability of WEBGL stopping to work because of the computational load.</p>
+              <br />
+
+              <div class="input-group">
+                <div class="input-group-prepend">
+                  <span class="input-group-text">Width x Height</span>
+                </div>
+                <input type="text" aria-label="width" class="form-control" id="widthInput">
+                <input type="text" aria-label="height" class="form-control" id="heightInput">
+              </div>
+              <br />
+
+              <div id="outputImage">
+
+              </div>
+            </div>
+          </div>
+
+
+        </div>
+      </div>
+      <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+
+        <div id="Tab2" class="text-center" style="display: none">
+          <h5 class="animated fadeIn mb-3">
+            Enable the camera to start the Realtime Pose Detection.
+          </h5>
+          <br/>
+          <h5>Select a Style</h5>
+          <select class="browser-default custom-select custom-select-lg mb-3" id="videoStyleSelect">
+            <option selected value="1">Wave</option>
+            <option value="2">Udnie</option>
+            <option value="3">Mathura</option>
+            <option value="4">Scream</option>
+            <option value="5">Matta</option>
+          </select>
+          <br/>
+          <button type="button " class="btn blue-gradient btn-lg" onclick="loadCam('#inputVideo')">Enable
+            Camera
+          </button>
+
+          <div class="row">
+            <div class="col-md-6">
+              <div class="view flex-center ">
+                <video onplay="onPlay(this)" id="inputVideo" autoplay muted></video>
+                <div class="mask flex-center ">
+                  <!-- <p class="white-text">strong overlay</p> -->
+                  <canvas id="refVideoOverlay" class="overlay" />
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <br/>
+              <br/>
+              <div id="videoOutput"></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab">
+        <div id="Tab2" class="text-center">
+          <div class="row">
+            <div class="col-sm-12 col-md-6">
+              <h5 class="animated fadeIn mb-3">
+                Enable the camera to start the Realtime Pose Detection.
+              </h5>
+              <button type="button " class="btn blue-gradient btn-lg" onclick="loadCam('#inputVideo2')">Enable
+                Camera</button>
+              <div class="view">
+                <video onplay="onPlay(this)" id="inputVideo2" autoplay muted style="width: 100%;"></video>
+                <div class="mask flex-center ">
+                  <!-- <p class="white-text">strong overlay</p> -->
+                  <canvas id="refVideoOverlay" class="overlay" />
+                </div>
+              </div>
+            </div>
+            <div class="col-sm-12 col-md-6">
+              <canvas id="renderCanvas"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCRIPTS -->
+  <!-- JQuery -->
+  <script type="text/javascript" src="https://rubencg195.github.io/js/jquery-3.3.1.min.js"></script>
+  <!-- Bootstrap tooltips -->
+  <script type="text/javascript" src="https://rubencg195.github.io/js/popper.min.js"></script>
+  <!-- Bootstrap core JavaScript -->
+  <script type="text/javascript" src="https://rubencg195.github.io/js/bootstrap.min.js"></script>
+  <!-- MDB core JavaScript -->
+  <script type="text/javascript" src="https://rubencg195.github.io/js/mdb.js"></script>
+  <!-- Load TensorFlow.js -->
+  <script src="https://unpkg.com/@tensorflow/tfjs"></script>
+  <!-- Load Posenet -->
+  <script src="https://unpkg.com/@tensorflow-models/posenet">
+  </script>
+  <script type="text/javascript" src="face-api.js"></script>
+
+  <script type="text/javascript" src="init.js"></script>
+  <script type="text/javascript" src="utils.js"></script>
+  <script type="text/javascript" src="cam_controller.js"></script>
+  <script type="text/javascript" src="style_transfer.js"></script>
+
+</body>
+
+</html>
