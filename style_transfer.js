@@ -175,7 +175,7 @@ async function transferImages() {
   styleSelected.transfer( image , function (err, result) {
     if(err){
       $(loaderTab1Id).show();
-      $(loaderTextTab1Id).html(`ERROR: ${err}\nTry a smaller image...`);
+      $(loaderTextTab1Id).html(`ERROR: ${err}  Try reloading the page.Thank you...`);
     }else{
       $('#outputImage').prepend(`<img id="styledImage" width="100%" src="${result.src}" />`);
       $(loaderTab1Id).hide();
